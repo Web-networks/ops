@@ -1,0 +1,49 @@
+---
+- name: Check users role parameters
+  assert: { that: "{{ item }} is defined" }
+  with_items: 
+    - users
+    - system_users
+
+- name: Create groups for normal and system users
+  group:
+    name: "{{ item.name }}"
+    state: present
+  with_items: "{{ users + system_users }}"
+
+- name: Create normal users
+  become: true
+  user:
+    name: "{{ item.name }}"
+    groups: "{{ item.name }},sudo"
+    shell: /bin/bash
+  with_items: "{{ users }}"
+
+- name: Create .ssh directory
+  become: true
+  file:
+    path: "/home/{{ item.name }}/.ssh"
+    state: directory
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    mode: '0700'
+  with_items: "{{ users }}"
+
+- name: Save public keys
+  become: true
+  copy:
+    content: "{{ item.public_key }}"
+    dest: /home/{{ item.name }}/.ssh/authorized_keys
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    mode: '0644'
+    force: no
+  with_items: "{{ users }}"
+
+- name: Add system users
+  user:
+    name: "{{ item.name }}"
+    groups: "{{ item.name }},sudo"
+    shell: /bin/bash
+  with_items: "{{ system_users }}"
+...
