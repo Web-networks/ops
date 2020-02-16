@@ -1,0 +1,91 @@
+---
+# This role is almost entirely based on documentation in
+# kubespray repo on setting up k8s cluster with vagrant:
+#
+# https://github.com/kubernetes-sigs/kubespray/blob/master/docs/vagrant.md
+
+- name: Check k8s-cluster role parameters
+  assert: { that: "{{ item }} is defined" }
+  with_items: 
+    - user
+    - vm_prefix
+    - vm_cpus
+    - vm_num_instances
+
+- set_fact:
+    kubespray_path: "/home/{{ user }}/kubespray"
+
+- set_fact:
+    venv_path: "{{ kubespray_path }}/venv"
+    inventory_path: "{{ kubespray_path }}/inventory/neuroide"
+
+- name: Download kubespray
+  become_user: "{{ user }}"
+  git:
+    repo: 'https://github.com/kubernetes-sigs/kubespray.git'
+    dest: "{{ kubespray_path }}"
+    version: v2.12.1
+
+- name: Install setuptools for pip module to work
+  apt:
+    name: python-setuptools
+    state: present
+
+- name: Manually create the initial virtualenv
+  become_user: "{{ user }}"
+  command:
+    cmd: "virtualenv --python=/usr/bin/python3.7 {{ venv_path }}"
+    creates: "{{ venv_path }}"
+
+- name: Install requirements
+  become_user: "{{ user }}"
+  pip: 
+    requirements: "{{ kubespray_path }}/requirements.txt"
+    virtualenv: "{{ venv_path }}"
+    virtualenv_python: python3.7
+
+- name: Prepare inventory for kubespray playbooks
+  become_user: "{{ user }}"
+  shell:
+    cmd: |
+      rm -rf {{ inventory_path }}.bak &> /dev/null || true
+      mv {{ inventory_path }} {{ inventory_path }}.bak &> /dev/null || true
+      cp -a inventory/sample {{ inventory_path }}
+      rm -f {{ inventory_path }}/hosts.ini || true
+    chdir: "{{ kubespray_path }}"
+    creates: "{{ inventory_path }}"
+
+- name: Create vagrant directory
+  become_user: "{{ user }}"
+  file:
+    path: "{{ kubespray_path }}/vagrant"
+    state: directory
+
+- name: Create vagrant/config.rb
+  become_user: "{{ user }}"
+  template:
+    src: config.rb.j2
+    dest: "{{ kubespray_path }}/vagrant/config.rb"
+
+- name: Make RPM cache directory for VMs
+  become_user: "{{ user }}"
+  file:
+    path: "{{ kubespray_path }}/temp/docker_rpms"
+    state: directory
+
+- name: Install rsync for vagrant
+  apt:
+    name: rsync
+    state: present
+
+- name: Run VMs
+  become_user: "{{ user }}"
+  shell:
+    cmd: vagrant up
+    chdir: "{{ kubespray_path }}"
+
+# TODO: make a copy of the downloaded docker rpm, to speed up the next provisioning run
+# TODO: copy kubectl access configuration in place
+# TODO: make the kubectl binary available
+
+...

@@ -13,3 +13,8 @@ users:
 
 system_users:
 - name: neuroide
+
+# for k8s-cluster
+vm_cpus: 2
+vm_num_instances: 3
+vm_prefix: neuroide-kube
