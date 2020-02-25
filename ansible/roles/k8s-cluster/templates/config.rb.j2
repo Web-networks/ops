@@ -1,8 +1,8 @@
 $instance_name_prefix = "{{ vm_prefix }}"
 $vm_cpus = {{ vm_cpus }}
 $num_instances = {{ vm_num_instances }}
-$os = "centos-bento"
-$subnet = "10.0.20"
+$os = "{{ vm_os }}"
+$subnet = "{{ vm_subnet_prefix }}"
 $network_plugin = "flannel"
 $inventory = "{{ inventory_path }}"
 $shared_folders = { '{{ kubespray_path }}/temp/docker_rpms' => "/var/cache/yum/x86_64/7/docker-ce/packages" }

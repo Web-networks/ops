@@ -10,7 +10,9 @@
     - user
     - vm_prefix
     - vm_cpus
+    - vm_os
     - vm_num_instances
+    - vm_subnet_prefix
 
 - set_fact:
     kubespray_path: "/home/{{ user }}/kubespray"
@@ -55,6 +57,12 @@
     chdir: "{{ kubespray_path }}"
     creates: "{{ inventory_path }}"
 
+- name: Customize kubespray addons
+  become_user: "{{ user }}"
+  copy:
+    src: "{{ role_path }}/files/kubespray.addons.yml"
+    dest: "{{ inventory_path }}/group_vars/k8s-cluster/addons.yml"
+
 - name: Create vagrant directory
   become_user: "{{ user }}"
   file:
@@ -78,14 +86,33 @@
     name: rsync
     state: present
 
-- name: Run VMs
-  become_user: "{{ user }}"
-  shell:
-    cmd: vagrant up
-    chdir: "{{ kubespray_path }}"
+#- name: Run VMs
+#  become_user: "{{ user }}"
+#  shell:
+#    cmd: vagrant up
+#    chdir: "{{ kubespray_path }}"
 
-# TODO: make a copy of the downloaded docker rpm, to speed up the next provisioning run
-# TODO: copy kubectl access configuration in place
-# TODO: make the kubectl binary available
+- name: Create kubectl configuration dir
+  file:
+    path: /home/{{ user }}/.kube
+    state: directory
 
+- name: Install kubectl config for {{ user }} user
+  file:
+    src: "{{ inventory_path }}/artifacts/admin.conf"
+    dest: /home/{{ user }}/.kube/config
+    force: yes
+    owner: neuroide
+    group: neuroide
+    state: link
+
+- name: Install kubectl system-wide
+  become: yes
+  file:
+    src: "{{ inventory_path }}/artifacts/kubectl"
+    dest: /usr/local/bin/kubectl
+    force: yes
+    owner: root
+    group: root
+    state: link
 ...
