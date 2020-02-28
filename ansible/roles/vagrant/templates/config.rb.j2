@@ -1,0 +1,8 @@
+$instance_name_prefix = "{{ vm_prefix }}"
+$vm_cpus = {{ vm_cpus }}
+$num_instances = {{ vm_num_instances }}
+$os = "{{ vm_os }}"
+$subnet = "{{ vm_subnet_prefix }}"
+$network_plugin = "flannel"
+$shared_folders = { '{{ base_path }}/temp/docker_rpms' => "/var/cache/yum/x86_64/7/docker-ce/packages" }
+

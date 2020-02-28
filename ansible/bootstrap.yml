@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: jumphost
   become: true
   tasks:
     - name: Add users

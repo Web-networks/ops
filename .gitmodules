@@ -1,0 +1,3 @@
+[submodule "kubespray"]
+	path = ansible/kubespray
+	url = git@github.com:Web-networks/kubespray.git

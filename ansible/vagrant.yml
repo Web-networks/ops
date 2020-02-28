@@ -1,0 +1,10 @@
+---
+- hosts: jumphost
+  become: true
+  tasks:
+    - name: Setup k8s vagrant slaves
+      import_role:
+        name: vagrant
+      vars:
+        user: sverdlov
+...

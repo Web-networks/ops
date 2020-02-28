@@ -1,2 +1,7 @@
-[all]
+[jumphost]
 bigone.demist.ru
+
+[kubespray]
+neuroide-kube-1
+neuroide-kube-2
+neuroide-kube-3
