@@ -1,0 +1,4 @@
+---
+- name: Include kubespray tasks
+  import_playbook: kubespray/cluster.yml
+...

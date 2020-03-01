@@ -19,6 +19,6 @@ vm_cpus: 2
 vm_num_instances: 3
 vm_os: centos-bento
 vm_prefix: neuroide-kube
-vm_subnet_prefix: 10.0.30
+vm_subnet_prefix: 10.0.40
 
 # certificates

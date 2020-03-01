@@ -19,22 +19,23 @@ Host bigone bigone.demist.ru
 Для того чтобы работал kubespray нужно положить в `~/.ssh/config`:
 ```ssh-config
 Host neuroide-kube-1
-    Hostname 127.0.0.1
+	Hostname 127.0.0.1
     User vagrant
-    Port 2222
-    ProxyCommand ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -W %h:%p bigone.demist.ru -i ~/.vagrant.d/insecure_private_key
+    Port 2202
+    ForwardAgent yes
+    ProxyCommand ssh -o ForwardAgent=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no bigone.demist.ru 'ssh-add /home/sverdlov/.vagrant.d/insecure_private_key && nc %h %p'
 
 Host neuroide-kube-2
-    Hostname 127.0.0.1
+	Hostname 127.0.0.1
     User vagrant
-    Port 2200
-    ProxyCommand ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -W %h:%p bigone.demist.ru -i ~/.vagrant.d/insecure_private_key
+    Port 2203
+    ProxyCommand ssh -o ForwardAgent=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -W %h:%p bigone.demist.ru -i ~/.vagrant.d/insecure_private_key
 
 Host neuroide-kube-3
-    Hostname 127.0.0.1
+	Hostname 127.0.0.1
     User vagrant
-    Port 2201
-    ProxyCommand ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -W %h:%p bigone.demist.ru -i ~/.vagrant.d/insecure_private_key
+    Port 2204
+    ProxyCommand ssh -o ForwardAgent=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -W %h:%p bigone.demist.ru -i ~/.vagrant.d/insecure_private_key
 ```
 
 # Бутстрап машины
