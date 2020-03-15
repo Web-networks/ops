@@ -5,4 +5,4 @@ $os = "{{ vm_os }}"
 $subnet = "{{ vm_subnet_prefix }}"
 $network_plugin = "flannel"
 $shared_folders = { '{{ base_path }}/temp/docker_rpms' => "/var/cache/yum/x86_64/7/docker-ce/packages" }
-
+$forwarded_ports = {443 => 8443, 80 => 8080}

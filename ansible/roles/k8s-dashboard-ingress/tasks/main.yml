@@ -1,0 +1,36 @@
+---
+- set_fact:
+    neuroide_k8s_dir: "{{ kube_config_dir }}/neuroide"
+
+- name: Neuroide | Dashboard Ingress | Create neuroide dir
+  file:
+    path: "{{ neuroide_k8s_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  when:
+    - inventory_hostname == groups['kube-master'][0]
+
+- name: Neuroide | Dashboard Ingress / ClusterIssuer | Create manifests
+  template:
+    src: "{{ item.file }}.j2"
+    dest: "{{ neuroide_k8s_dir }}/{{ item.file }}"
+  with_items:
+    - { name: k8s-dashboard-ingress, file: k8s-dashboard-ingress.yml, type: ingress }
+    - { name: k8s-cert-manager-issuer, file: k8s-cert-manager-issuer.yml, type: clusterissuer }
+  register: neuroide_dashboard_manifests
+  when:
+    - inventory_hostname == groups['kube-master'][0]
+
+- name: Cert Manager | Apply manifests
+  kube:
+    name: "{{ item.item.name }}"
+    namespace: "kube-system"
+    kubectl: "{{ bin_dir }}/kubectl"
+    resource: "{{ item.item.type }}"
+    filename: "{{ neuroide_k8s_dir }}/{{ item.item.file }}"
+    state: "latest"
+  with_items: "{{ neuroide_dashboard_manifests.results }}"
+  when:
+    - inventory_hostname == groups['kube-master'][0]

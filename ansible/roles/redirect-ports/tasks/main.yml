@@ -1,0 +1,17 @@
+---
+- name: Install rinetd
+  become: yes
+  apt: name=rinetd state=latest
+
+- name: Copy rinetd config
+  become: true
+  copy:
+    src: "{{ role_path }}/files/rinetd.conf"
+    dest: /etc/rinetd.conf
+    mode: '0644'
+    force: yes
+  with_items: "{{ users }}"
+
+- name: Reload rinetd
+  become: true
+  service: name=rinetd state=restarted

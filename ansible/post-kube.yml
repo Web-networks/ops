@@ -1,0 +1,39 @@
+- hosts: jumphost
+  tasks:
+    - name: Install kubectl
+      tags: kubectl
+      import_role:
+        name: kubectl
+
+- hosts: kube-master
+  tasks:
+    - name: Install Ingress for k8s dashboard
+      import_role:
+        name: k8s-dashboard-ingress
+
+- hosts: jumphost
+  tasks:
+    - name: Redirect ports
+      import_role:
+        name: redirect-ports
+
+- hosts: jumphost
+  tasks:
+    - pip:
+        name:
+          - pyhelm
+          - grpcio
+        state: present
+
+    - name: Install cert-manager via helm chart
+      become_user: sverdlov
+      shell: |
+        kubectl apply --validate=false \
+            -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.14/deploy/manifests/00-crds.yaml
+        helm repo add jetstack https://charts.jetstack.io
+        helm repo update
+        helm install \
+          cert-manager jetstack/cert-manager \
+          --kubeconfig ~/.kube/config \
+          --namespace cert-manager \
+          --version v0.14.0

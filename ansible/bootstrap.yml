@@ -5,4 +5,12 @@
     - name: Add users
       import_role:
         name: users
+    - name: Enable IP Forwarding
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        sysctl_set: yes
+    - name: Install helm
+      import_role:
+        name: andrewrothstein.kubernetes-helm
 ...
